@@ -1,9 +1,11 @@
+# Return average bounding box length of object based on object-space bbox.
+# Alan Yang 06.29.22
+
 from maya import OpenMaya as om
 from maya import cmds
 
 
-# Return average bounding box length of object based on object-space bbox.
-def get_object_size(selection):
+def run(selection, *args):
 
     # Check if selection exists in scene and get OM path
     selectionList = om.MSelectionList()
@@ -36,7 +38,3 @@ def get_object_size(selection):
 
     # Return average length of bbox side
     return (dimension[0] + dimension[1] + dimension[2])/3
-
-# Example usage
-# selected = cmds.ls(sl=1, type='transform')
-# print(get_object_size(selected))
