@@ -296,7 +296,7 @@ class paintContext (object):
         self.strokeIntersectionList = intersectionList()
 
         #create the temporary group used through the stroke to store geometry as they are created
-        self.tempgroup = mc.group (empty=True, name=spPaint3dTempGroupID)
+        self.tempgroup = mc.group(empty=True, name=spPaint3dTempGroupID)
 
         pressPosition = mc.draggerContext(spPaint3dContextID, query=True, anchorPoint=True)
 
@@ -488,7 +488,7 @@ class paintContext (object):
                 #source group sorting
                 for obj in self.strokeIntersectionList.intersectionList:
                     #print("object created: %s (using source: %s) || will be sorted here: %s" % (obj.generatedDAG, obj.dagMeshSourceObject, groupName))
-                    shapeParent = mc.listRelatives(obj.dagMeshSourceObject, parent=True)
+                    shapeParent = mc.listRelatives(obj.dagMeshSourceObject, parent=True, f=1)
                     groupName = 'spPaint3dOutput_' + shapeParent[0]
                     if(not mc.objExists(groupName)):
                         #group doesnt exists, creating
@@ -499,7 +499,7 @@ class paintContext (object):
         #last cleanup, removing the temp group
         if mc.objExists(self.tempgroup):
             if(sp3d_log): print("tempGroup exists, attempting to remove if empty")
-            if (not mc.listRelatives(self.tempgroup, children=True)):
+            if (not mc.listRelatives(self.tempgroup, children=True, f=1)):
                 #tempGroup is empty, deleting
                 if(sp3d_log): print("tempGroup (%s) is empty, removing." % self.tempgroup)
                 mc.delete(self.tempgroup)
@@ -515,12 +515,12 @@ class paintContext (object):
         if (self.uiValues.instance):
             if(sp3d_dbg): logDebugInfo('creating instance')
             #fetching the transform for that shape (instance dont create object of child objects if it's the shape that gets instanced)
-            tempDAG = mc.listRelatives(intersection.dagMeshSourceObject, parent=True)
+            tempDAG = mc.listRelatives(intersection.dagMeshSourceObject, parent=True, f=1)
             newObjectDAG = mc.instance(tempDAG[0])
         else:
             #fetching the parent transform to prevent some issue while duplicating with preserve input connections and stuff docked onto the transform and not the shape
             if(sp3d_dbg): logDebugInfo('duplicating object')
-            tempDAG = mc.listRelatives(intersection.dagMeshSourceObject, parent=True)
+            tempDAG = mc.listRelatives(intersection.dagMeshSourceObject, parent=True, f=1)
             newObjectDAG = mc.duplicate(tempDAG[0], ic=self.uiValues.preserveConn)
         if(sp3d_dbg): logDebugInfo('DONE creating instance / duplicating object')
 
@@ -674,7 +674,7 @@ class placeCursor (object):
         if (deleteprevious):
             if(mc.objExists(self.cursorDAG)):
                 #deleting the previous cursor object and its parent group if it's empty
-                parentgroup = mc.listRelatives(self.cursorDAG, parent=True)
+                parentgroup = mc.listRelatives(self.cursorDAG, parent=True, f=1)
                 mc.delete(self.cursorDAG)
                 if (not mc.listRelatives(parentgroup)): mc.delete(parentgroup)
         self.cursorDAG = cursordag
@@ -798,7 +798,7 @@ class placeContext (object):
         #instancing multiple object doesnt work if using a shape
         #duplicating input connections on the parent transform is not carried over if using the shape
         if(mc.nodeType(sourceDAG)!='transform'):
-            tempDAG = mc.listRelatives(sourceDAG, parent=True)
+            tempDAG = mc.listRelatives(sourceDAG, parent=True, f=1)
             sourceDAG = tempDAG[0]
 
         newObjectDAG = None
@@ -1019,7 +1019,7 @@ class placeContext (object):
 
             elif (self.uiValues.group==2.0):
                 #source group sorting
-                shapeParent = mc.listRelatives(self.cursor.sourceDAG, parent=True)
+                shapeParent = mc.listRelatives(self.cursor.sourceDAG, parent=True, f=1)
                 groupName = 'spPaint3dOutput_' + shapeParent[0]
                 if(not mc.objExists(groupName)):
                     #group doesnt exists, creating
@@ -1029,7 +1029,7 @@ class placeContext (object):
 
         #last cleanup, removing the temp group
         if(mc.objExists(self.tempgroup)):
-            if (not mc.listRelatives(self.tempgroup, children=True)):
+            if (not mc.listRelatives(self.tempgroup, children=True, f=1)):
                 #tempGroup is empty, deleting
                 mc.delete(self.tempgroup)
 
@@ -1077,7 +1077,7 @@ def getPosition(dag):
     tempdag = dag
     if (mc.nodeType(tempdag)!='transform'):
         #get the transform to that shape
-        temprelatives = mc.listRelatives(tempdag, parent=True)
+        temprelatives = mc.listRelatives(tempdag, parent=True, f=1)
         tempdag=temprelatives[0]
 
     scalePivot = mc.xform(tempdag, query=True, ws=True, sp=True)

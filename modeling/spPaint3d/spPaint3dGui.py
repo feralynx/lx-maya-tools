@@ -262,7 +262,8 @@ class sp3dObjectList (object):
         Return True if all objects from the dictionnary really do/still exist in the scene (some monkeys delete objects while the script is running :))
         Return False once the method finds a missing object
         '''
-        if (len(self.obj.keys()) == 0): return False #list is empty
+        keys_as_list = list(self.obj.keys())
+        if (len(keys_as_list) == 0): return False #list is empty
         for obj, data in self.obj.items():
             if(self.errorHandle): self.errorHandle.raiseError("INFO: validating object: %s", data[0])
             if(not mc.objExists(data[0])): return False
@@ -303,7 +304,7 @@ class sp3dObjectList (object):
         else:
             #Determine if obj is valid, or if has valid children
             objtype = mc.objectType(obj)
-            objchild = mc.listRelatives(obj, children=True, shapes=True) #get all the children shapes of the object
+            objchild = mc.listRelatives(obj, children=True, shapes=True, f=1) #get all the children shapes of the object
 
             if (objtype in self.auth):
                 #a shape was selected and is part of the authorized object types for this list type. will use the shape's name as the key
@@ -371,7 +372,7 @@ class sp3dObjectList (object):
         will return None if the method was unsuccessful to retrieve the selected object (if object was deleted from the scene while the script was running for example)
         '''
         #TODO: implement weight and boolean flag
-        dkeys = self.obj.keys()
+        dkeys = list(self.obj.keys())
         dag = self.obj[dkeys[rand.randint(0, len(dkeys) - 1)]]
         return dag[0]
 
@@ -381,7 +382,7 @@ class sp3dObjectList (object):
         will return None if the method was unsuccessful to retrieve the selected object (if object was deleted from the scene while the script was running for example)
         '''
         #TODO: implement boolean flag
-        dkeys = self.obj.keys()
+        dkeys = list(self.obj.keys())
         dkeys.sort()
         dag = self.obj[dkeys[self.i % len(dkeys)]]
         self.i += 1
@@ -741,7 +742,7 @@ class spPaint3dWin (object):
 
         if (mode == 'add'):
             #ADD
-            objselected = mc.ls(selection=True)
+            objselected = mc.ls(selection=True, l=1)
             for obj in objselected:
                 addresult, addcomment = self.__dict__[objlist].addObj(obj)
                 if (addresult == None):
@@ -1088,7 +1089,7 @@ def getDAGPath(node, depth=False):
 
     if(nodetype != 'transform'):
         #node is not a transform, will proceed upstream to its immediate parent and will verify if the parent is a transform
-        tempdag = mc.listRelatives(node, parent=True)
+        tempdag = mc.listRelatives(node, parent=True, f=1)
         if(tempdag):
             #node has a parent
             if(len(tempdag) == 1):
@@ -1098,12 +1099,12 @@ def getDAGPath(node, depth=False):
 
     if(nodetype == 'transform'):
         #node is a transform, making sure it has only one children of shape type
-        childlist = mc.listRelatives(node, children=True, shapes=True)
+        childlist = mc.listRelatives(node, children=True, shapes=True, f=1)
         if(childlist):
             if(len(childlist) == 1):
                 #there's only 1 shape below the transform
-                if(depth): dag = mc.listRelatives(node, fullPath=True, shapes=True)
-                else: dag = mc.listRelatives(node, path=True, shapes=True)
+                if(depth): dag = mc.listRelatives(node, fullPath=True, shapes=True, f=1)
+                else: dag = mc.listRelatives(node, path=True, shapes=True, f=1)
 
     if(dag):
         return dag[0]
