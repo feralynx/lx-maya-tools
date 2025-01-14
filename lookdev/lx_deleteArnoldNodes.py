@@ -1,27 +1,27 @@
 # delete all Arnold Nodes from scene and then run delete unused nodes afterwards for cleanup
 
 import maya.cmds as mc
-import maya.mel as mel
-from functools import partial
 
-def deleteArnoldMats():
-    scene_node_types = mc.ls(nt=True)
-    for type in scene_node_types:
-        if 'ai' not in type:
+
+def removeAllArnoldNodes(verbose=True, removeDisplacement=True):
+    aiNodeTypes = mc.pluginInfo("mtoa", q=1, dependNode=1)
+    if removeDisplacement: aiNodeTypes.append('displacementShader')
+
+    count = 0
+    for nodeType in aiNodeTypes:
+        nodes = mc.ls(type=nodeType, rn=False)
+        if not nodes:
+            print("No nodes of type {}".format(nodeType))
             continue
-        arnold_nodes = mc.ls(type=type)
-        if arnold_nodes:
-            for node in arnold_nodes:
-                try:
-                    if not mc.referenceQuery(node, isNodeReferenced=True):
-                        if mc.lockNode(node, lock=True):
-                            mc.lockNode(node, lock=False)
-                        mc.delete(node)
-                        print('Deleted ' + node)
-                except Exception as e:
-                    print('Could not delete ' + node + ' -- ' + e.message)
-                    pass
-        mel.eval('MLdeleteUnused')
+        
+        try:
+            mc.delete(nodes)
+            count += len(nodes)
+            print("Deleted: " + str(nodes))
+        except Exception as ex:
+            print("Could not delete nodes of type {0}.\n   {1}".format(nodeType, ex))
+            continue
 
+    mc.confirmDialog(message="Deleted {} nodes.".format( str(count) ), button="OK")
 
-deleteArnoldMats()
+removeAllArnoldNodes(True, True)
