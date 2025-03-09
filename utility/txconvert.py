@@ -94,9 +94,9 @@ def main(path, filter, recursive, verbose, *args):
     print("Processing {0} texture files...".format(len(texture_files)))
     with futures.ThreadPoolExecutor(len(texture_files)) as executor:
         tasks = [executor.submit(run_maketx, file, verbose) for file in texture_files]
+        print("Starting maketx process...\n", flush=True)
         for task in futures.as_completed(tasks):
-            print(task.result())
-
+            print(task.result(), flush=True)
 
 # Parse arguments and run main function
 if not __name__ == '__main__':
